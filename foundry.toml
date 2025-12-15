@@ -1,0 +1,29 @@
+[profile.default]
+src = 'contracts'
+out = 'out'
+libs = ['lib']
+test = 'test'
+cache_path = 'cache_forge'
+
+solc = "0.8.28"
+optimizer = true
+optimizer-runs = 10_000_000
+via_ir = true
+dynamic_test_linking = true
+
+remappings = [
+    "forge-std/=lib/forge-std/src/",
+    "euler-price-oracle/=lib/euler-price-oracle/src/",
+    "ethereum-vault-connector/=lib/euler-price-oracle/lib/ethereum-vault-connector/src/",
+    "@pendle/core-v2/=lib/pendle-core-v2-public/contracts/",
+    "@aave/core-v3/=lib/aave-v3-core/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+    "@uniswap/v4-core/=lib/v4-core",
+    "@uniswap/v4-periphery/=lib/v4-periphery/",
+    "@uniswap/v3-periphery/=lib/v3-periphery/",
+    "@uniswap/v3-core/=lib/v3-core/",
+    "@uniswap/universal-router/=lib/universal-router/",
+]
+
+fs_permissions = [{ access = "read-write", path = "./script/deployment/" }]
