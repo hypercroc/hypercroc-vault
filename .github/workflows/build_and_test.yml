@@ -27,9 +27,11 @@ jobs:
       - name: Run tests
         env:
           ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
+          HYPER_RPC_URL: ${{ secrets.HYPER_RPC_URL }}
         run: make test
 
       - name: Run coverage
         env:
           ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
+          HYPER_RPC_URL: ${{ secrets.HYPER_RPC_URL }}
         run: make coverage
