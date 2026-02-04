@@ -13,6 +13,8 @@ import {CrossAdapter} from "euler-price-oracle/adapter/CrossAdapter.sol";
 import {CurveEMAOracle} from "euler-price-oracle/adapter/curve/CurveEMAOracle.sol";
 import {LidoFundamentalOracle} from "euler-price-oracle/adapter/lido/LidoFundamentalOracle.sol";
 import {ChainlinkOracle} from "euler-price-oracle/adapter/chainlink/ChainlinkOracle.sol";
+import {PythOracle} from "euler-price-oracle/adapter/pyth/PythOracle.sol";
+import {RedstoneCoreOracle} from "euler-price-oracle/adapter/redstone/RedstoneCoreOracle.sol";
 import {IPMarket} from "@pendle/core-v2/interfaces/IPMarket.sol";
 import {IPPrincipalToken} from "@pendle/core-v2/interfaces/IPPrincipalToken.sol";
 
@@ -139,6 +141,49 @@ abstract contract SetupEulerOracleBase is Script, DeployHelper {
         vm.stopBroadcast();
 
         chainlinkOracle = address(oracle);
+    }
+
+    function _deployPythOracle(
+        address base,
+        address quote,
+        address pyth,
+        bytes32 feedId,
+        uint256 maxStaleness,
+        uint256 maxConfWidth
+    ) internal returns (address pythOracle)
+    {
+        address deployedOracle = _getOracleConfig(base, quote);
+        if (deployedOracle != address(0)) {
+            return deployedOracle;
+        }
+
+        vm.startBroadcast();
+        PythOracle oracle = new PythOracle(pyth, base, quote, feedId, maxStaleness, maxConfWidth);
+        eulerRouter.govSetConfig(base, quote, address(oracle));
+        vm.stopBroadcast();
+
+        pythOracle = address(oracle);
+    }
+
+    function _deployRedstoneOracle(
+        address base,
+        address quote,
+        bytes32 feedId,
+        uint8 feedDecimals,
+        uint256 maxStaleness
+    ) internal returns (address redstoneOracle)
+    {
+        address deployedOracle = _getOracleConfig(base, quote);
+        if (deployedOracle != address(0)) {
+            return deployedOracle;
+        }
+
+        vm.startBroadcast();
+        RedstoneCoreOracle oracle = new RedstoneCoreOracle(base, quote, feedId, feedDecimals, maxStaleness);
+        eulerRouter.govSetConfig(base, quote, address(oracle));
+        vm.stopBroadcast();
+
+        redstoneOracle = address(oracle);
     }
 
     function _addResolvedVault(address vault) internal returns (address) {

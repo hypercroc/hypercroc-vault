@@ -18,10 +18,11 @@ contract ChainValues {
 
     error ChainValues__ZeroAddress(string chainName, string valueName);
     error ChainValues__ZeroBytes32(string chainName, string valueName);
+    error ChainValues__ZeroUint8(string chainName, string valueName);
     error ChainValues__ValueAlreadySet(string chainName, string valueName);
 
     constructor() {
-
+        _addHyperEvmValues();
     }
 
     function getChainName() public view returns (string memory) {
@@ -63,6 +64,17 @@ contract ChainValues {
         }
     }
 
+    function getUint8(string memory valueName) public view returns (uint8 b) {
+        b = getUint8(getChainName(), valueName);
+    }
+
+    function getUint8(string memory chainName, string memory valueName) public view returns (uint8 b) {
+        b = uint8(uint256(s_values[chainName][valueName]));
+        if (b == 0) {
+            revert ChainValues__ZeroUint8(chainName, valueName);
+        }
+    }
+
     function setValue(bool overrideOk, string memory valueName, bytes32 value) public {
         setValue(overrideOk, getChainName(), valueName, value);
     }
@@ -80,5 +92,32 @@ contract ChainValues {
 
     function setAddress(bool overrideOk, string memory chainName, string memory valueName, address value) public {
         setValue(overrideOk, chainName, valueName, value.toBytes32());
+    }
+
+    function _addHyperEvmValues() private {
+        /* =========== TOKENS ==================== */
+        s_values["hyperEvm"]["USDT"] = 0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb.toBytes32();
+        s_values["hyperEvm"]["USDC"] = 0xb88339CB7199b77E23DB6E890353E22632Ba630f.toBytes32();
+        s_values["hyperEvm"]["hbUSDT"] = 0x5e105266db42f78FA814322Bce7f388B4C2e61eb.toBytes32();
+        s_values["hyperEvm"]["hUSDT"] = 0x10982ad645D5A112606534d8567418Cf64c14cB5.toBytes32();
+        s_values["hyperEvm"]["xHYPE"] = 0xAc962FA04BF91B7fd0DC0c5C32414E0Ce3C51E03.toBytes32();
+        s_values["hyperEvm"]["kHYPE"] = 0xfD739d4e423301CE9385c1fb8850539D657C296D.toBytes32();
+        s_values["hyperEvm"]["UETH"] = 0xBe6727B535545C67d5cAa73dEa54865B92CF7907.toBytes32();
+        s_values["hyperEvm"]["UBTC"] = 0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463.toBytes32();
+
+        /* ============= CHAINLINK DATA FEEDS =======================*/
+        s_values["hyperEvm"]["ChainlinkFeed_USDT_USD"] = 0x9114446540B4f8E0E310041981f7c1Be6181Ed07.toBytes32();
+        s_values["hyperEvm"]["ChainlinkFeed_HYPE_USD"] = 0xa5a72eF19F82A579431186402425593a559ed352.toBytes32();
+        s_values["hyperEvm"]["ChainlinkFeed_UETH_USD"] = 0x54EdE484Bb0E589F5eE13e04c84f46eb787c9C6a.toBytes32();
+        s_values["hyperEvm"]["ChainlinkFeed_UBTC_USD"] = 0xd7752D8831a209F5177de52b3b32b5098A7B56b8.toBytes32();
+        s_values["hyperEvm"]["ChainlinkFeed_kHYPE_HYPE"] = 0x272deDc9fe4227027b027B016957CF6661120eCB.toBytes32();
+
+        /* ============= PYTH DATA FEEDS =======================*/
+        s_values["hyperEvm"]["PythOracle"] = 0xe9d69CdD6Fe41e7B621B4A688C5D1a68cB5c8ADc.toBytes32();
+        s_values["hyperEvm"]["PythFeedId_xHYPE_USDC"] = 0x4e3352e8f55536e85d7d9fcb4aa3393326ede1961f36c0bceb75fbb2f36d9b1f;
+
+        /* ============= REDSTONE DATA FEEDS =======================*/
+        s_values["hyperEvm"]["RedstoneFeedId_hbUSDT_USDT"] = 0x6862555344545f46554e44414d454e54414c0000000000000000000000000000;
+        s_values["hyperEvm"]["RedstoneFeedDecimals_hbUSDT_USDT"] = bytes32(uint256(8));
     }
 }
