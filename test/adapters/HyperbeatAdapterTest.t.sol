@@ -81,7 +81,7 @@ contract HyperbeatAdapterTest is Test {
 
         HyperbeatAdapter _adapter = new HyperbeatAdapter(address(USDT), address(HB_USDT), Depositor, HBWithdrawalQueue);
         assertEq(address(_adapter.getUSDT()), address(USDT));
-        assertEq(address(_adapter.getHbUSDT()), address(USDT));
+        assertEq(address(_adapter.getHbUSDT()), address(HB_USDT));
         assertEq(address(_adapter.getHyperbeatDepositor()), Depositor);
         assertEq(address(_adapter.getHyperbeatWithdrawalQueue()), HBWithdrawalQueue);
     }
