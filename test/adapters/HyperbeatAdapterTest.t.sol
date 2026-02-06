@@ -122,7 +122,7 @@ contract HyperbeatAdapterTest is Test {
     }
 
     function test_instantWithdraw() public {
-        uint256 amount = 5 ether;
+        uint256 amount = 5_000 * 10 ** 6;
         deal(address(HB_USDT), address(hyperCrocVault), amount);
 
         vm.prank(address(hyperCrocVault));
@@ -135,8 +135,8 @@ contract HyperbeatAdapterTest is Test {
     }
 
     function test_instantWithdrawAllExcept() public {
-        uint256 amount = 5 ether;
-        uint256 except = 2 ether;
+        uint256 amount = 5_000 * 10 ** 6;
+        uint256 except = 2_000 * 10 ** 6;
         deal(address(HB_USDT), address(hyperCrocVault), amount);
 
         vm.prank(address(hyperCrocVault));
