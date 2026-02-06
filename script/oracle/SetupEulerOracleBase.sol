@@ -224,6 +224,8 @@ abstract contract SetupEulerOracleBase is Script, DeployHelper {
     }
 
     function _getLogTokenName(address token) internal view returns (string memory) {
+        if (token == USD) return "USD";
+
         ERC20 tokenContract = ERC20(token);
         if (keccak256(abi.encodePacked(tokenContract.name())) == keccak256(abi.encodePacked("Pendle Market"))) {
             (, IPPrincipalToken pt,) = IPMarket(token).readTokens();

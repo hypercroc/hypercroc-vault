@@ -95,7 +95,10 @@ contract ChainValues {
     }
 
     function _addHyperEvmValues() private {
+        s_values["hyperEvm"]["EulerOracle"] = 0xA52B0805F30eAB4CA61Ed5f4F051B5a0f863cA4f.toBytes32();
+
         /* =========== TOKENS ==================== */
+        s_values["hyperEvm"]["wHYPE"] = 0x5555555555555555555555555555555555555555.toBytes32();
         s_values["hyperEvm"]["USDT"] = 0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb.toBytes32();
         s_values["hyperEvm"]["USDC"] = 0xb88339CB7199b77E23DB6E890353E22632Ba630f.toBytes32();
         s_values["hyperEvm"]["hbUSDT"] = 0x5e105266db42f78FA814322Bce7f388B4C2e61eb.toBytes32();
@@ -107,6 +110,7 @@ contract ChainValues {
 
         /* ============= CHAINLINK DATA FEEDS =======================*/
         s_values["hyperEvm"]["ChainlinkFeed_USDT_USD"] = 0x9114446540B4f8E0E310041981f7c1Be6181Ed07.toBytes32();
+        s_values["hyperEvm"]["ChainlinkFeed_USDC_USD"] = 0xA0Adc43ce7AfE3EE7d7eac3C994E178D0620223B.toBytes32();
         s_values["hyperEvm"]["ChainlinkFeed_HYPE_USD"] = 0xa5a72eF19F82A579431186402425593a559ed352.toBytes32();
         s_values["hyperEvm"]["ChainlinkFeed_UETH_USD"] = 0x54EdE484Bb0E589F5eE13e04c84f46eb787c9C6a.toBytes32();
         s_values["hyperEvm"]["ChainlinkFeed_UBTC_USD"] = 0xd7752D8831a209F5177de52b3b32b5098A7B56b8.toBytes32();
@@ -117,7 +121,11 @@ contract ChainValues {
         s_values["hyperEvm"]["PythFeedId_xHYPE_USDC"] = 0x4e3352e8f55536e85d7d9fcb4aa3393326ede1961f36c0bceb75fbb2f36d9b1f;
 
         /* ============= REDSTONE DATA FEEDS =======================*/
-        s_values["hyperEvm"]["RedstoneFeedId_hbUSDT_USDT"] = 0x6862555344545f46554e44414d454e54414c0000000000000000000000000000;
-        s_values["hyperEvm"]["RedstoneFeedDecimals_hbUSDT_USDT"] = bytes32(uint256(8));
+        s_values["hyperEvm"]["RedstoneFeed_hbUSDT_USDT"] = 0x96572d32d699cE463Fdf36610273CC76B7d83f9b.toBytes32();
+
+        /* ============= DEPLOYED EULER ORACLES ========== */
+        s_values["hyperEvm"]["Chainlink_USDT_USD_oracle"] = 0x75423551E165213ec9EBE1e3d9F836601181b8a2.toBytes32();
+        s_values["hyperEvm"]["Chainlink_USDC_USD_oracle"] = 0x5d4a156089bF6937ECf58eA58a9550Aaa7Bfb3eD.toBytes32();
+        s_values["hyperEvm"]["Cross_wHYPE_USDT_oracle"] = 0xB9aB7B26FD9Fa58bF5CFA089dad3D5aB368F288a.toBytes32();
     }
 }
