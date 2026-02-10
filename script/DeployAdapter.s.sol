@@ -26,6 +26,7 @@ import {MorphoAdapterV1_1} from "contracts/adapters/morpho/MorphoAdapterV1_1.sol
 import {UniswapAdapter} from "contracts/adapters/uniswap/UniswapAdapter.sol";
 import {PendleAdapter} from "contracts/adapters/pendle/PendleAdapter.sol";
 import {ResolvAdapter} from "contracts/adapters/resolv/ResolvAdapter.sol";
+import {HyperbeatAdapter} from "contracts/adapters/hyperbeat/HyperbeatAdapter.sol";
 import {DeployHyperCrocVaultFactory} from "./DeployHyperCrocVaultFactory.s.sol";
 
 /**
@@ -38,21 +39,22 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
     string public constant DEPLOYMENT_FILE = "adapters.json";
 
     function run() public {
-        deployAdapter(Adapter.AaveAdapter, address(0));
-        deployAdapter(Adapter.CurveRouterAdapter, address(0));
-        deployAdapter(Adapter.EthenaAdapter, address(0));
-        deployAdapter(Adapter.EtherfiBTC, address(0));
-        deployAdapter(Adapter.EtherfiETH, address(0));
-        deployAdapter(Adapter.HyperCrocPoolAdapter, address(0));
-        deployAdapter(Adapter.HyperCrocVaultAdapter, address(0));
-        deployAdapter(Adapter.Lido, address(0));
-        deployAdapter(Adapter.MakerDaoDAI, address(0));
-        deployAdapter(Adapter.MakerDaoUSDS, address(0));
-        deployAdapter(Adapter.Morpho, address(0));
-        deployAdapter(Adapter.MorphoV1_1, address(0));
-        deployAdapter(Adapter.PendleAdapter, address(0));
-        deployAdapter(Adapter.UniswapAdapter, address(0));
-        deployAdapter(Adapter.ResolvAdapter, address(0));
+        // deployAdapter(Adapter.AaveAdapter, address(0));
+        // deployAdapter(Adapter.CurveRouterAdapter, address(0));
+        // deployAdapter(Adapter.EthenaAdapter, address(0));
+        // deployAdapter(Adapter.EtherfiBTC, address(0));
+        // deployAdapter(Adapter.EtherfiETH, address(0));
+        // deployAdapter(Adapter.HyperCrocPoolAdapter, address(0));
+        // deployAdapter(Adapter.HyperCrocVaultAdapter, address(0));
+        // deployAdapter(Adapter.Lido, address(0));
+        // deployAdapter(Adapter.MakerDaoDAI, address(0));
+        // deployAdapter(Adapter.MakerDaoUSDS, address(0));
+        // deployAdapter(Adapter.Morpho, address(0));
+        // deployAdapter(Adapter.MorphoV1_1, address(0));
+        // deployAdapter(Adapter.PendleAdapter, address(0));
+        // deployAdapter(Adapter.UniswapAdapter, address(0));
+        // deployAdapter(Adapter.ResolvAdapter, address(0));
+        // deployAdapter(Adapter.HyperbeatAdapter, address(0));
     }
 
     function getDeployedAdapter(Adapter adapter, address vault) public view returns (address) {
@@ -115,6 +117,8 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
             deployedAdapter = _deployResolv();
         } else if (adapter == Adapter.UniswapAdapter) {
             deployedAdapter = _deployUniswap();
+        } else if (adapter == Adapter.HyperbeatAdapter) {
+            deployedAdapter = _deployHyperbeat();
         }
 
         if (deployedAdapter == address(0)) {
@@ -250,6 +254,17 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         vm.broadcast();
         UniswapAdapter uniswapAdapter = new UniswapAdapter(uniswapV3Router, universalRouter, permit2);
         return address(uniswapAdapter);
+    }
+
+    function _deployHyperbeat() internal returns (address) {
+        address usdt = getAddress("USDT");
+        address hbUSDT = getAddress("hbUSDT");
+        address depositor = getAddress("HyperbeatUSDTDepositor");
+        address withdrawalQueue = getAddress("HyperbeatUSDTWithdrawalQueue");
+
+        vm.broadcast();
+        HyperbeatAdapter hyperbeatAdapter = new HyperbeatAdapter(usdt, hbUSDT, depositor, withdrawalQueue);
+        return address(hyperbeatAdapter);
     }
 
     function _saveDeployment(Adapter adapter, address adapterAddress, address hyperCrocVault) internal {

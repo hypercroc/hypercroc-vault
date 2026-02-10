@@ -127,5 +127,15 @@ contract ChainValues {
         s_values["hyperEvm"]["Chainlink_USDT_USD_oracle"] = 0x75423551E165213ec9EBE1e3d9F836601181b8a2.toBytes32();
         s_values["hyperEvm"]["Chainlink_USDC_USD_oracle"] = 0x5d4a156089bF6937ECf58eA58a9550Aaa7Bfb3eD.toBytes32();
         s_values["hyperEvm"]["Cross_wHYPE_USDT_oracle"] = 0xB9aB7B26FD9Fa58bF5CFA089dad3D5aB368F288a.toBytes32();
+
+        /* ============= HYPERLEND ADDRESSES ========== */
+        s_values["hyperEvm"]["AavePoolAddressProvider"] = 0x72c98246a98bFe64022a3190e7710E157497170C.toBytes32();
+
+        /* ============== X PROJECT =============== */
+        s_values["hyperEvm"]["UniswapV3Router"] = 0x1EbDFC75FfE3ba3de61E7138a3E8706aC841Af9B.toBytes32();
+
+        /* ============== HYPERBEAT =============== */
+        s_values["hyperEvm"]["HyperbeatUSDTDepositor"] = 0x6261F30144B259C74243D5f5D9230941186AC936.toBytes32();
+        s_values["hyperEvm"]["HyperbeatUSDTWithdrawalQueue"] = 0x240e0b2cb615Ded2FE90fDe265B15988Dc45B1c6.toBytes32();
     }
 }
