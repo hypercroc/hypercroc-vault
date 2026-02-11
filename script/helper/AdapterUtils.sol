@@ -17,7 +17,8 @@ enum Adapter {
     PendleAdapter,
     ResolvAdapter,
     UniswapAdapter,
-    HyperbeatAdapter
+    HyperbeatAdapter,
+    LiminalAdapter
 }
 
 abstract contract AdapterUtils {
@@ -58,6 +59,8 @@ abstract contract AdapterUtils {
             return "UniswapAdapter";
         } else if (adapter == Adapter.HyperbeatAdapter) {
             return "HyperbeatAdapter";
+        } else if (adapter == Adapter.LiminalAdapter) {
+            return "LiminalAdapter";
         }
 
         revert("Adapter not supported");
