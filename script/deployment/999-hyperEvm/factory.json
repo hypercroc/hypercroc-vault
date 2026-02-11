@@ -1,0 +1,6 @@
+{
+  "FactoryImplementation": "0xBD90c2041F8071cb781847986ab7DdcB6bd3DaB6",
+  "FactoryProxy": "0x3Eff8160d34091689949668D828f86d38fc9A834",
+  "HyperCrocVaultImplementation": "0xB134522C465f89cc2fF909C08cB6A55b7E604268",
+  "WithdrawalQueueImplementation": "0x5F763887615aE411d662bb9A476fBA9a6f1d6854"
+}

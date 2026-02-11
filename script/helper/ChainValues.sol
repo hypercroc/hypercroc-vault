@@ -95,7 +95,12 @@ contract ChainValues {
     }
 
     function _addHyperEvmValues() private {
+        /* ============ HYPERCROC VAULTS ========== */
+        s_values["hyperEvm"]["HyperCrocVaultFactory"] = 0x3Eff8160d34091689949668D828f86d38fc9A834.toBytes32();
         s_values["hyperEvm"]["EulerOracle"] = 0xA52B0805F30eAB4CA61Ed5f4F051B5a0f863cA4f.toBytes32();
+        s_values["hyperEvm"]["FeeCollector"] = 0x3C7345f55389174Db894C6DD37018Da42551ec67.toBytes32();
+        s_values["hyperEvm"]["VaultManager"] = 0x53aBd360454AEb73D141D0F743e9b68079E00E58.toBytes32();
+        s_values["hyperEvm"]["WithdrawalQueueFinalizer"] = 0x53aBd360454AEb73D141D0F743e9b68079E00E58.toBytes32();
 
         /* =========== TOKENS ==================== */
         s_values["hyperEvm"]["wHYPE"] = 0x5555555555555555555555555555555555555555.toBytes32();
