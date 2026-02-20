@@ -94,20 +94,23 @@ contract KinetiqAdapter is AdapterBase, IExternalPositionAdapter {
 
     /// @notice Check if there first withdrawal request is finalized and ready for claim
     /// @param vault Address of the vault to check
-    /// @return true if request is claimable
-    function isClaimable(address vault) external view returns (bool) {
+    /// @return asset asset that will be received after the claim
+    /// @return amount amount of asset received
+    function claimable(address vault) external view returns (address asset, uint256 amount) {
         WithdrawalQueue storage queue = s_queues[vault];
         uint256 queueStart = queue.start;
         uint256 queueLength = queue.end - queueStart;
-        if (queueLength == 0) return false;
+        if (queueLength == 0) return (address(0), 0);
 
         IStakingManager stakingManager = i_stakingManager;
         uint256 delay = stakingManager.withdrawalDelay();
         IStakingManager.WithdrawalRequest memory request =
             stakingManager.withdrawalRequests(address(this), queue.requests[queueStart]);
 
-        if (block.timestamp < request.timestamp + delay) return false;
-        return address(stakingManager).balance >= request.hypeAmount;
+        if (block.timestamp < request.timestamp + delay) return (address(0), 0);
+        if (address(stakingManager).balance < request.hypeAmount) return (address(0), 0);
+
+        return (address(i_wHYPE), request.hypeAmount);
     }
 
     function getManagedAssets() external view returns (address[] memory assets, uint256[] memory amounts) {

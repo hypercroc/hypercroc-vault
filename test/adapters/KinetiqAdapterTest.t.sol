@@ -194,8 +194,10 @@ contract KinetiqAdapterTest is Test {
         assertEq(adapter.getWithdrawalQueueRequest(address(hyperCrocVault), 0), requestId);
     }
 
-    function test_claimWithdrawal1() public {
-        assertFalse(adapter.isClaimable(address(hyperCrocVault)));
+    function test_claimWithdrawal() public {
+        (address asset, uint256 claimableAmount) = adapter.claimable(address(hyperCrocVault));
+        assertEq(asset, address(0));
+        assertEq(claimableAmount, 0);
 
         uint256 amount = 5 ether;
         deal(address(WHYPE), address(hyperCrocVault), amount);
@@ -205,12 +207,16 @@ contract KinetiqAdapterTest is Test {
         adapter.requestWithdrawal(withdrawalAmount);
         vm.stopPrank();
 
-        assertFalse(adapter.isClaimable(address(hyperCrocVault)));
+        (asset, claimableAmount) = adapter.claimable(address(hyperCrocVault));
+        assertEq(asset, address(0));
+        assertEq(claimableAmount, 0);
 
         uint256 start = block.timestamp;
         vm.warp(start + StakingManager.withdrawalDelay());
 
-        assertTrue(adapter.isClaimable(address(hyperCrocVault)));
+        (asset, claimableAmount) = adapter.claimable(address(hyperCrocVault));
+        assertEq(asset, address(WHYPE));
+        assertNotEq(claimableAmount, 0);
 
         uint256 balanceBefore = WHYPE.balanceOf(address(hyperCrocVault));
 
@@ -221,7 +227,7 @@ contract KinetiqAdapterTest is Test {
         vm.prank(address(hyperCrocVault));
         adapter.claimWithdrawal();
 
-        assertTrue(WHYPE.balanceOf(address(hyperCrocVault)) > balanceBefore);
+        assertEq(WHYPE.balanceOf(address(hyperCrocVault)), balanceBefore + claimableAmount);
 
         (address[] memory assets, uint256[] memory amounts) = adapter.getManagedAssets();
         assertEq(assets.length, 0);
