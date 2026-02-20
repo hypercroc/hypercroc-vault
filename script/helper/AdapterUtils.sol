@@ -18,7 +18,8 @@ enum Adapter {
     ResolvAdapter,
     UniswapAdapter,
     HyperbeatAdapter,
-    LiminalAdapter
+    LiminalAdapter,
+    KinetiqAdapter
 }
 
 abstract contract AdapterUtils {
@@ -61,6 +62,8 @@ abstract contract AdapterUtils {
             return "HyperbeatAdapter";
         } else if (adapter == Adapter.LiminalAdapter) {
             return "LiminalAdapter";
+        } else if (adapter == Adapter.KinetiqAdapter) {
+            return "KinetiqAdapter";
         }
 
         revert("Adapter not supported");

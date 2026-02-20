@@ -146,5 +146,8 @@ contract ChainValues {
         /* ============== LIMINAL =============== */
         s_values["hyperEvm"]["LiminalUSDTDepositPipe"] = 0xe2d9598D5FeDb9E4044D50510AabA68B095f2Ab2.toBytes32();
         s_values["hyperEvm"]["LiminalRedemptionPipe"] = 0x19f4881cdB479d01cE214F6908c99b4fe76C03e8.toBytes32();
+
+        /* ============== KINETIQ =============== */
+        s_values["hyperEvm"]["KinetiqStakingManager"] = 0x393D0B87Ed38fc779FD9611144aE649BA6082109.toBytes32();
     }
 }

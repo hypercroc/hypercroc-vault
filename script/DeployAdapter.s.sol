@@ -28,6 +28,7 @@ import {PendleAdapter} from "contracts/adapters/pendle/PendleAdapter.sol";
 import {ResolvAdapter} from "contracts/adapters/resolv/ResolvAdapter.sol";
 import {HyperbeatAdapter} from "contracts/adapters/hyperbeat/HyperbeatAdapter.sol";
 import {LiminalAdapter} from "contracts/adapters/liminal/LiminalAdapter.sol";
+import {KinetiqAdapter} from "contracts/adapters/kinetiq/KinetiqAdapter.sol";
 import {DeployHyperCrocVaultFactory} from "./DeployHyperCrocVaultFactory.s.sol";
 
 /**
@@ -56,7 +57,8 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         // deployAdapter(Adapter.UniswapAdapter, address(0));
         // deployAdapter(Adapter.ResolvAdapter, address(0));
         // deployAdapter(Adapter.HyperbeatAdapter, address(0));
-        deployAdapter(Adapter.LiminalAdapter, address(0));
+        // deployAdapter(Adapter.LiminalAdapter, address(0));
+        deployAdapter(Adapter.KinetiqAdapter, address(0));
     }
 
     function getDeployedAdapter(Adapter adapter, address vault) public view returns (address) {
@@ -123,6 +125,8 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
             deployedAdapter = _deployHyperbeat();
         } else if (adapter == Adapter.LiminalAdapter) {
             deployedAdapter = _deployLiminal();
+        } else if (adapter == Adapter.KinetiqAdapter) {
+            deployedAdapter = _deployKinetiq();
         }
 
         if (deployedAdapter == address(0)) {
@@ -280,6 +284,15 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         vm.broadcast();
         LiminalAdapter liminalAdapter = new LiminalAdapter(usdc, xHYPE, depositPipe, redemptionPipe);
         return address(liminalAdapter);
+    }
+
+    function _deployKinetiq() internal returns (address) {
+        address wHYPE = getAddress("wHYPE");
+        address stakingManager = getAddress("KinetiqStakingManager");
+
+        vm.broadcast();
+        KinetiqAdapter kinetiqAdapter = new KinetiqAdapter(wHYPE, stakingManager);
+        return address(kinetiqAdapter);
     }
 
     function _saveDeployment(Adapter adapter, address adapterAddress, address hyperCrocVault) internal {
