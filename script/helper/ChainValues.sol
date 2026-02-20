@@ -142,5 +142,9 @@ contract ChainValues {
         /* ============== HYPERBEAT =============== */
         s_values["hyperEvm"]["HyperbeatUSDTDepositor"] = 0x6261F30144B259C74243D5f5D9230941186AC936.toBytes32();
         s_values["hyperEvm"]["HyperbeatUSDTWithdrawalQueue"] = 0x240e0b2cb615Ded2FE90fDe265B15988Dc45B1c6.toBytes32();
+
+        /* ============== LIMINAL =============== */
+        s_values["hyperEvm"]["LiminalUSDTDepositPipe"] = 0xe2d9598D5FeDb9E4044D50510AabA68B095f2Ab2.toBytes32();
+        s_values["hyperEvm"]["LiminalRedemptionPipe"] = 0x19f4881cdB479d01cE214F6908c99b4fe76C03e8.toBytes32();
     }
 }
