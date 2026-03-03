@@ -56,7 +56,7 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         // deployAdapter(Adapter.UniswapAdapter, address(0));
         // deployAdapter(Adapter.ResolvAdapter, address(0));
         // deployAdapter(Adapter.HyperbeatAdapter, address(0));
-        deployAdapter(Adapter.LiminalAdapter, address(0));
+        // deployAdapter(Adapter.LiminalAdapter, address(0));
     }
 
     function getDeployedAdapter(Adapter adapter, address vault) public view returns (address) {
@@ -122,7 +122,7 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         } else if (adapter == Adapter.HyperbeatAdapter) {
             deployedAdapter = _deployHyperbeat();
         } else if (adapter == Adapter.LiminalAdapter) {
-            deployedAdapter = _deployLiminal();
+            deployedAdapter = _deployLiminal(hyperCrocVault);
         }
 
         if (deployedAdapter == address(0)) {
@@ -271,14 +271,14 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         return address(hyperbeatAdapter);
     }
 
-    function _deployLiminal() internal returns (address) {
+    function _deployLiminal(address hyperCrocVault) internal returns (address) {
         address usdc = getAddress("USDC");
         address xHYPE = getAddress("xHYPE");
         address depositPipe = getAddress("LiminalUSDTDepositPipe");
         address redemptionPipe = getAddress("LiminalRedemptionPipe");
 
         vm.broadcast();
-        LiminalAdapter liminalAdapter = new LiminalAdapter(usdc, xHYPE, depositPipe, redemptionPipe);
+        LiminalAdapter liminalAdapter = new LiminalAdapter(hyperCrocVault, usdc, xHYPE, depositPipe, redemptionPipe);
         return address(liminalAdapter);
     }
 
