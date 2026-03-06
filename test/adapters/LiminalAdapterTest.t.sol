@@ -16,6 +16,7 @@ import {EulerRouterMock} from "../mocks/EulerRouterMock.t.sol";
 import {Asserts} from "../../contracts/libraries/Asserts.sol";
 import {IExternalPositionAdapter} from "../../contracts/interfaces/IExternalPositionAdapter.sol";
 import {IAdapter} from "../../contracts/interfaces/IAdapter.sol";
+import {IRedemptionPipe} from "../../contracts/adapters/liminal/interfaces/IRedemptionPipe.sol";
 
 contract LiminalAdapterTest is Test {
     string private mainnetRpcUrl = vm.envString("HYPER_RPC_URL");
@@ -25,7 +26,8 @@ contract LiminalAdapterTest is Test {
     IERC20 private constant XHYPE = IERC20(0xAc962FA04BF91B7fd0DC0c5C32414E0Ce3C51E03);
 
     address private constant DepositPipe = 0xe2d9598D5FeDb9E4044D50510AabA68B095f2Ab2;
-    address private constant RedemptionPipe = 0x19f4881cdB479d01cE214F6908c99b4fe76C03e8;
+    IRedemptionPipe private constant RedemptionPipe = IRedemptionPipe(0x19f4881cdB479d01cE214F6908c99b4fe76C03e8);
+    address private constant ADMIN = 0x56485380BA2Af7581b96E8811a78Dbea4bd7db9A;
 
     LiminalAdapter private adapter;
     HyperCrocVault private hyperCrocVault;
@@ -61,9 +63,16 @@ contract LiminalAdapterTest is Test {
         hyperCrocVault.setMaxExternalPositionAdapters(type(uint8).max);
         hyperCrocVault.setMaxTrackedAssets(type(uint8).max);
 
-        adapter = new LiminalAdapter(address(USDC), address(XHYPE), DepositPipe, RedemptionPipe);
+        adapter = new LiminalAdapter(
+            address(hyperCrocVault),
+            address(USDC),
+            address(XHYPE),
+            DepositPipe,
+            address(RedemptionPipe)
+        );
+
         hyperCrocVault.addAdapter(address(adapter));
-        assertEq(hyperCrocVault.externalPositionAdapterPosition(address(adapter)), 0);
+        assertEq(hyperCrocVault.externalPositionAdapterPosition(address(adapter)), 1);
 
         hyperCrocVault.addTrackedAsset(address(USDC));
         hyperCrocVault.addTrackedAsset(address(XHYPE));
@@ -71,27 +80,39 @@ contract LiminalAdapterTest is Test {
 
     function test_constructor() public {
         vm.expectRevert(Asserts.ZeroAddress.selector);
-        new LiminalAdapter(address(0), address(1), address(1), address(1));
+        new LiminalAdapter(address(0), address(1), address(1), address(1), address(1));
+
+         vm.expectRevert(Asserts.ZeroAddress.selector);
+        new LiminalAdapter(address(hyperCrocVault), address(0), address(1), address(1), address(1));
 
         vm.expectRevert(Asserts.ZeroAddress.selector);
-        new LiminalAdapter(address(USDC), address(0), address(1), address(1));
+        new LiminalAdapter(address(hyperCrocVault), address(USDC), address(0), address(1), address(1));
 
         vm.expectRevert(Asserts.ZeroAddress.selector);
-        new LiminalAdapter(address(USDC), address(XHYPE), address(0), address(1));
+        new LiminalAdapter(address(hyperCrocVault), address(USDC), address(XHYPE), address(0), address(1));
 
         vm.expectRevert(Asserts.ZeroAddress.selector);
-        new LiminalAdapter(address(USDC), address(XHYPE), DepositPipe, address(0));
+        new LiminalAdapter(address(hyperCrocVault), address(USDC), address(XHYPE), DepositPipe, address(0));
 
-        LiminalAdapter _adapter = new LiminalAdapter(address(USDC), address(XHYPE), DepositPipe, RedemptionPipe);
+        LiminalAdapter _adapter = new LiminalAdapter(
+            address(hyperCrocVault),
+            address(USDC),
+            address(XHYPE),
+            DepositPipe,
+            address(RedemptionPipe)
+        );
+
+        assertEq(address(_adapter.getHyperCrocVault()), address(hyperCrocVault));
         assertEq(address(_adapter.getUSDC()), address(USDC));
         assertEq(address(_adapter.getDepositAsset()), address(USDT));
         assertEq(address(_adapter.getXHYPE()), address(XHYPE));
         assertEq(address(_adapter.getLiminalDepositPipe()), DepositPipe);
-        assertEq(address(_adapter.getLiminalRedemptionPipe()), RedemptionPipe);
+        assertEq(address(_adapter.getLiminalRedemptionPipe()), address(RedemptionPipe));
     }
 
     function test_supportsInterface() public view {
         assertTrue(adapter.supportsInterface(type(IAdapter).interfaceId));
+        assertTrue(adapter.supportsInterface(type(IExternalPositionAdapter).interfaceId));
     }
 
     function test_deposit() public {
@@ -107,6 +128,9 @@ contract LiminalAdapterTest is Test {
         assertEq(XHYPE.balanceOf(address(adapter)), 0);
         assertEq(USDT.balanceOf(address(adapter)), 0);
         assertEq(address(adapter).balance, 0);
+
+        _assertNoManagedAssets();
+        _assertNoDebtAssets();
     }
 
     function test_depositAllExcept() public {
@@ -123,6 +147,9 @@ contract LiminalAdapterTest is Test {
         assertEq(USDT.balanceOf(address(hyperCrocVault)), except);
         assertEq(XHYPE.balanceOf(address(adapter)), 0);
         assertEq(USDT.balanceOf(address(adapter)), 0);
+
+        _assertNoManagedAssets();
+        _assertNoDebtAssets();
     }
 
     function test_redeem() public {
@@ -132,124 +159,175 @@ contract LiminalAdapterTest is Test {
         vm.prank(address(hyperCrocVault));
         uint256 output = adapter.redeem(amount);
 
-        assertEq(XHYPE.balanceOf(address(hyperCrocVault)),0);
+        assertEq(XHYPE.balanceOf(address(hyperCrocVault)), 0);
         assertEq(USDT.balanceOf(address(hyperCrocVault)), 0);
         assertEq(USDC.balanceOf(address(hyperCrocVault)), output);
         assertEq(XHYPE.balanceOf(address(adapter)), 0);
         assertEq(USDT.balanceOf(address(adapter)), 0);
         assertEq(USDC.balanceOf(address(adapter)), 0);
+
+        _assertNoManagedAssets();
+        _assertNoDebtAssets();
     }
 
-    // function test_requestWithdrawalAllExcept() public {
-    //     uint256 amount = 5 ether;
-    //     deal(address(WHYPE), address(hyperCrocVault), amount);
-    //     vm.startPrank(address(hyperCrocVault));
-    //     adapter.stake(amount);
+     function test_redeemAllExcept() public {
+        uint256 amount = 5 ether;
+        uint256 except = 2 ether;
+        deal(address(XHYPE), address(hyperCrocVault), amount);
 
-    //     uint256 kHYPEBalance = KHYPE.balanceOf(address(hyperCrocVault));
+        vm.prank(address(hyperCrocVault));
+        uint256 output = adapter.redeemAllExcept(except);
 
-    //     uint256 expectedRequestId = StakingManager.nextWithdrawalId(address(adapter));
-    //     uint256 exceptAmount = 3 ether;
-    //     uint256 withdrawalAmount = kHYPEBalance - exceptAmount;
+        assertEq(XHYPE.balanceOf(address(hyperCrocVault)),  except);
+        assertEq(USDT.balanceOf(address(hyperCrocVault)), 0);
+        assertEq(USDC.balanceOf(address(hyperCrocVault)), output);
+        assertEq(XHYPE.balanceOf(address(adapter)), 0);
+        assertEq(USDT.balanceOf(address(adapter)), 0);
+        assertEq(USDC.balanceOf(address(adapter)), 0);
 
-    //     vm.expectEmit(true, true, false, false);
-    //     emit KinetiqAdapter.KinetiqWithdrawalRequested(address(hyperCrocVault), expectedRequestId, withdrawalAmount);
-    //     adapter.requestWithdrawalAllExcept(exceptAmount);
+        _assertNoManagedAssets();
+        _assertNoDebtAssets();
+    }
 
-    //     uint256 requestId = StakingManager.nextWithdrawalId(address(adapter)) - 1;
-    //     IStakingManager.WithdrawalRequest memory request =
-    //         StakingManager.withdrawalRequests(address(adapter), requestId);
-    //     assertNotEq(request.hypeAmount, 0);
+    function test_requestRedeem() public {
+        uint256 withdrawalAmount = 5 ether;
+        deal(address(XHYPE), address(hyperCrocVault), withdrawalAmount);
 
-    //     (address[] memory assets, uint256[] memory amounts) = adapter.getManagedAssets();
-    //     assertEq(assets.length, 1);
-    //     assertEq(assets[0], address(WHYPE));
-    //     assertEq(amounts.length, 1);
-    //     assertEq(amounts[0], request.hypeAmount);
+        vm.prank(address(hyperCrocVault));
+        adapter.requestRedeem(withdrawalAmount);
 
-    //     (address[] memory debtAssets, uint256[] memory debtAmounts) = adapter.getDebtAssets();
-    //     assertEq(debtAssets.length, 0);
-    //     assertEq(debtAmounts.length, 0);
+        assertEq(XHYPE.balanceOf(address(hyperCrocVault)), 0);
+        assertEq(USDT.balanceOf(address(hyperCrocVault)), 0);
+        assertEq(USDC.balanceOf(address(hyperCrocVault)), 0);
+        assertEq(XHYPE.balanceOf(address(adapter)), 0);
+        assertEq(USDT.balanceOf(address(adapter)), 0);
+        assertEq(USDC.balanceOf(address(adapter)), 0);
 
-    //     assertEq(adapter.getWithdrawalQueueStart(address(hyperCrocVault)), 0);
-    //     assertEq(adapter.getWithdrawalQueueEnd(address(hyperCrocVault)), 1);
-    //     assertEq(adapter.getWithdrawalQueueRequest(address(hyperCrocVault), 0), requestId);
-    // }
+        assertEq(RedemptionPipe.pendingRedeemRequest(address(adapter)), withdrawalAmount);
 
-    // function test_claimWithdrawal1() public {
-    //     assertFalse(adapter.isClaimable(address(hyperCrocVault)));
+        _assertManagedAssets(withdrawalAmount);
+        _assertNoDebtAssets();
+    }
 
-    //     uint256 amount = 5 ether;
-    //     deal(address(WHYPE), address(hyperCrocVault), amount);
-    //     vm.startPrank(address(hyperCrocVault));
-    //     adapter.stake(amount);
-    //     uint256 withdrawalAmount = 2 ether;
-    //     adapter.requestWithdrawal(withdrawalAmount);
-    //     vm.stopPrank();
+    function test_requestRedeemAllExcept() public {
+        uint256 balance = 5 ether;
+        uint256 except = 2 ether;
+        uint256 withdrawalAmount = balance - except;
+        deal(address(XHYPE), address(hyperCrocVault), balance);
 
-    //     assertFalse(adapter.isClaimable(address(hyperCrocVault)));
+        vm.prank(address(hyperCrocVault));
+        adapter.requestRedeemAllExcept(except);
 
-    //     uint256 start = block.timestamp;
-    //     vm.warp(start + StakingManager.withdrawalDelay());
+        assertEq(XHYPE.balanceOf(address(hyperCrocVault)), except);
+        assertEq(USDT.balanceOf(address(hyperCrocVault)), 0);
+        assertEq(USDC.balanceOf(address(hyperCrocVault)), 0);
+        assertEq(XHYPE.balanceOf(address(adapter)), 0);
+        assertEq(USDT.balanceOf(address(adapter)), 0);
+        assertEq(USDC.balanceOf(address(adapter)), 0);
 
-    //     assertTrue(adapter.isClaimable(address(hyperCrocVault)));
+        assertEq(RedemptionPipe.pendingRedeemRequest(address(adapter)), withdrawalAmount);
 
-    //     uint256 balanceBefore = WHYPE.balanceOf(address(hyperCrocVault));
+        _assertManagedAssets(withdrawalAmount);
+        _assertNoDebtAssets();
+    }
 
-    //     vm.expectEmit(true, true, false, false);
-    //     emit KinetiqAdapter.KinetiqWithdrawalClaimed(
-    //         address(hyperCrocVault), StakingManager.nextWithdrawalId(address(adapter)) - 1, withdrawalAmount
-    //     );
-    //     vm.prank(address(hyperCrocVault));
-    //     adapter.claimWithdrawal();
+    function test_fulfillment() public {
+        uint256 withdrawalAmount = 5 ether;
+        deal(address(XHYPE), address(hyperCrocVault), withdrawalAmount);
 
-    //     assertTrue(WHYPE.balanceOf(address(hyperCrocVault)) > balanceBefore);
+        vm.prank(address(hyperCrocVault));
+        adapter.requestRedeem(withdrawalAmount);
 
-    //     (address[] memory assets, uint256[] memory amounts) = adapter.getManagedAssets();
-    //     assertEq(assets.length, 0);
-    //     assertEq(amounts.length, 0);
-    // }
+        _fulfill(withdrawalAmount);
 
-    // function test_claimWithdrawalShouldFailWhenQueueIsEmpty() public {
-    //     vm.prank(address(hyperCrocVault));
-    //     vm.expectRevert(abi.encodeWithSelector(KinetiqAdapter.KinetiqAdapter__NoWithdrawRequestInQueue.selector));
-    //     adapter.claimWithdrawal();
-    // }
+        assertEq(XHYPE.balanceOf(address(hyperCrocVault)), 0);
+        assertEq(USDT.balanceOf(address(hyperCrocVault)), 0);
+        assertGt(USDC.balanceOf(address(hyperCrocVault)), 0);
+        assertEq(XHYPE.balanceOf(address(adapter)), 0);
+        assertEq(USDT.balanceOf(address(adapter)), 0);
+        assertEq(USDC.balanceOf(address(adapter)), 0);
 
-    // function test_getDebtAssets() public view {
-    //     (address[] memory assets, uint256[] memory amounts) = adapter.getDebtAssets();
-    //     assertEq(assets.length, 0);
-    //     assertEq(amounts.length, 0);
-    // }
+        assertEq(RedemptionPipe.pendingRedeemRequest(address(adapter)), 0);
 
-    // function test_getManagedAssets() public {
-    //     (address[] memory assets, uint256[] memory amounts) = adapter.getManagedAssets(address(hyperCrocVault));
-    //     assertEq(assets.length, 0);
-    //     assertEq(amounts.length, 0);
+        _assertNoManagedAssets();
+        _assertNoDebtAssets();
+    }
 
-    //     uint256 amount = 5 ether;
-    //     deal(address(WHYPE), address(hyperCrocVault), amount);
-    //     vm.startPrank(address(hyperCrocVault));
-    //     adapter.stake(amount);
-    //     uint256 withdrawalAmount = 2 ether;
-    //     adapter.requestWithdrawal(withdrawalAmount);
+    function testFuzz_onlyVault(address signer) public {
+        vm.assume(signer != address(hyperCrocVault));
 
-    //     (assets, amounts) = adapter.getManagedAssets(address(hyperCrocVault));
-    //     assertEq(assets.length, 1);
-    //     assertEq(amounts.length, 1);
-    // }
+        uint256 amount = 5 ether;
 
-    // function test_getWithdrawalQueueRequestShouldFailWhenEmptyQueue() public {
-    //     vm.expectRevert(abi.encodeWithSelector(KinetiqAdapter.KinetiqAdapter__NoWithdrawRequestInQueue.selector));
-    //     adapter.getWithdrawalQueueRequest(address(hyperCrocVault), 0);
-    // }
+        vm.prank(address(signer));
+        vm.expectRevert(LiminalAdapter.NoAccess.selector);
+        adapter.deposit(amount, 0);
 
-    // function test_receive() public {
-    //     address user = address(0x123);
-    //     uint256 amount = 1 ether;
-    //     vm.deal(user, amount);
-    //     vm.startPrank(user);
-    //     (bool success,) = address(adapter).call{value: amount}("");
-    //     assertTrue(success);
-    // }
+        vm.prank(address(signer));
+        vm.expectRevert(LiminalAdapter.NoAccess.selector);
+        adapter.depositAllExcept(amount, 0);
+
+        vm.prank(address(signer));
+        vm.expectRevert(LiminalAdapter.NoAccess.selector);
+        adapter.redeem(amount);
+
+        vm.prank(address(signer));
+        vm.expectRevert(LiminalAdapter.NoAccess.selector);
+        adapter.redeemAllExcept(amount);
+
+        vm.prank(address(signer));
+        vm.expectRevert(LiminalAdapter.NoAccess.selector);
+        adapter.requestRedeem(amount);
+
+        vm.prank(address(signer));
+        vm.expectRevert(LiminalAdapter.NoAccess.selector);
+        adapter.requestRedeemAllExcept(amount);
+    }
+
+    function _fulfill(uint256 requestedShares) private {
+        deal(address(USDC), ADMIN, 1 ether);
+
+        address[] memory owners = new address[](1);
+        owners[0] = address(adapter);
+
+        uint256[] memory shares = new uint256[](1);
+        shares[0] = requestedShares;
+
+        vm.prank(ADMIN);
+        RedemptionPipe.fulfillRedeems(owners, shares);
+    }
+
+    function _assertManagedAssets(uint256 amount) private {
+        vm.prank(address(hyperCrocVault));
+        (address[] memory assets, uint256[] memory amounts) = adapter.getManagedAssets();
+        assertEq(assets.length, 1);
+        assertEq(amounts.length, 1);
+
+        assertEq(assets[0], address(XHYPE));
+        assertEq(amounts[0], amount);
+
+        (assets, amounts) = adapter.getManagedAssets(address(hyperCrocVault));
+        assertEq(assets.length, 1);
+        assertEq(amounts.length, 1);
+
+        assertEq(assets[0], address(XHYPE));
+        assertEq(amounts[0], amount);
+    }
+
+    function _assertNoManagedAssets() private {
+        vm.prank(address(hyperCrocVault));
+        (address[] memory assets, uint256[] memory amounts) = adapter.getManagedAssets();
+        assertEq(assets.length, 0);
+        assertEq(amounts.length, 0);
+
+        (assets, amounts) = adapter.getManagedAssets(address(hyperCrocVault));
+        assertEq(assets.length, 0);
+        assertEq(amounts.length, 0);
+    }
+
+    function _assertNoDebtAssets() private {
+        vm.prank(address(hyperCrocVault));
+        (address[] memory assets, uint256[] memory amounts) = adapter.getDebtAssets();
+        assertEq(assets.length, 0);
+        assertEq(amounts.length, 0);
+    }
 }
