@@ -23,7 +23,10 @@ enum Adapter {
 
 abstract contract AdapterUtils {
     function _isPerVaultAdapter(Adapter adapter) internal pure returns (bool) {
-        return adapter == Adapter.EthenaAdapter || adapter == Adapter.HyperCrocPoolAdapter || adapter == Adapter.EtherfiBTC;
+        return adapter == Adapter.EthenaAdapter 
+            || adapter == Adapter.HyperCrocPoolAdapter
+            || adapter == Adapter.EtherfiBTC
+            || adapter == Adapter.LiminalAdapter;
     }
 
     function _getAdapterName(Adapter adapter) internal pure returns (string memory) {

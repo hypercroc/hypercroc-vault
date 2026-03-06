@@ -137,6 +137,10 @@ contract LiminalAdapter is AdapterBase, IExternalPositionAdapter {
         return address(i_redemptionPipe);
     }
 
+    /// @dev tech method
+    ///      all withdrawal requests output tokens instantly get to the vault, no claims required
+    function claimable(address vault) external pure returns (address asset, uint256 claimableAmount) {}
+
     function _deposit(IERC20 depositAsset, uint256 amount, uint256 minShares) private returns (uint256 xHYPEAmount) {
         IAdapterCallback(msg.sender).adapterCallback(address(this), address(depositAsset), amount);
         IDepositPipe depositPipe = i_depositPipe;
