@@ -108,6 +108,7 @@ contract ChainValues {
         s_values["hyperEvm"]["USDC"] = 0xb88339CB7199b77E23DB6E890353E22632Ba630f.toBytes32();
         s_values["hyperEvm"]["hbUSDT"] = 0x5e105266db42f78FA814322Bce7f388B4C2e61eb.toBytes32();
         s_values["hyperEvm"]["hUSDT"] = 0x10982ad645D5A112606534d8567418Cf64c14cB5.toBytes32();
+        s_values["hyperEvm"]["hUETH"] = 0xdBA3B25643C11be9BDF457D6b3926992A735c523.toBytes32();
         s_values["hyperEvm"]["xHYPE"] = 0xAc962FA04BF91B7fd0DC0c5C32414E0Ce3C51E03.toBytes32();
         s_values["hyperEvm"]["kHYPE"] = 0xfD739d4e423301CE9385c1fb8850539D657C296D.toBytes32();
         s_values["hyperEvm"]["UETH"] = 0xBe6727B535545C67d5cAa73dEa54865B92CF7907.toBytes32();
@@ -132,6 +133,7 @@ contract ChainValues {
         s_values["hyperEvm"]["Chainlink_USDT_USD_oracle"] = 0x75423551E165213ec9EBE1e3d9F836601181b8a2.toBytes32();
         s_values["hyperEvm"]["Chainlink_USDC_USD_oracle"] = 0x5d4a156089bF6937ECf58eA58a9550Aaa7Bfb3eD.toBytes32();
         s_values["hyperEvm"]["Cross_wHYPE_USDT_oracle"] = 0xB9aB7B26FD9Fa58bF5CFA089dad3D5aB368F288a.toBytes32();
+        s_values["hyperEvm"]["Cross_UETH_USDT_oracle"] = 0x470Cfc33c0b8A816DCDbB3e3B39cddBF3F0A1C0c.toBytes32();
 
         /* ============= HYPERLEND ADDRESSES ========== */
         s_values["hyperEvm"]["AavePoolAddressProvider"] = 0x72c98246a98bFe64022a3190e7710E157497170C.toBytes32();
