@@ -33,6 +33,7 @@ contract SetupFlagshipVaultOracle is SetupEulerOracleBase {
         // _setupPrice_hUSDT__USDT();
         // _setupPrice_hbUSDT__USDT();
         // _setupPrice_xHYPE__USDT();
+        // _setupPrice_hUETH__USDT();
     }
 
     function _setupPrice_USDT__USD() private {
@@ -48,6 +49,14 @@ contract SetupFlagshipVaultOracle is SetupEulerOracleBase {
 
         _addHyperlend_hUsdt_USDT_price();
         _checkOraclePrice(hUSDT, USDT);
+    }
+
+    function _setupPrice_hUETH__USDT() private {
+        address hUETH = getAddress("hUETH");
+        address USDT = getAddress("USDT");
+
+        _addCrossOracle_hUETH__USDT();
+        _checkOraclePrice(hUETH, USDT);
     }
 
     function _setupPrice_hbUSDT__USDT() private {
@@ -105,6 +114,15 @@ contract SetupFlagshipVaultOracle is SetupEulerOracleBase {
         uint256 rate = 10 ** baseDecimals; // fixed conversion rate between hUSDT and USDT
 
         return _deployFixedRateOracle(hUSDT, USDT, rate);
+    }
+
+    function _addHyperlend_hUETH_UETH_price() private returns (address) {
+        address hUETH = getAddress("hUETH");
+        address UETH = getAddress("UETH");
+        uint256 baseDecimals = ERC20(hUETH).decimals();
+        uint256 rate = 10 ** baseDecimals; // fixed conversion rate between hUSDT and USDT
+
+        return _deployFixedRateOracle(hUETH, UETH, rate);
     }
 
      function _addPyth_xHYPE__USDC() private returns (address) {
@@ -165,6 +183,17 @@ contract SetupFlagshipVaultOracle is SetupEulerOracleBase {
         address usdtUsdOracle = getAddress("Chainlink_USDT_USD_oracle");
 
         return _deployCrossOracle(UETH, USD, USDT, hypeUsdOracle, usdtUsdOracle);
+    }
+
+    function _addCrossOracle_hUETH__USDT() private returns (address) {
+        address hUETH = getAddress("hUETH");
+        address UETH = getAddress("UETH");
+        address USDT = getAddress("USDT");
+
+        address hUethUethOracle = _addHyperlend_hUETH_UETH_price();
+        address uethUsdtOracle = getAddress("Cross_UETH_USDT_oracle");
+
+        return _deployCrossOracle(hUETH, UETH, USDT, hUethUethOracle, uethUsdtOracle);
     }
 
     function _addCrossOracle_UBTC__USDT() private returns (address) {
