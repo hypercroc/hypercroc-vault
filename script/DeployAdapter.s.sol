@@ -120,7 +120,7 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         } else if (adapter == Adapter.UniswapAdapter) {
             deployedAdapter = _deployUniswap();
         } else if (adapter == Adapter.HyperbeatAdapter) {
-            deployedAdapter = _deployHyperbeat();
+            deployedAdapter = _deployHyperbeat(hyperCrocVault);
         } else if (adapter == Adapter.LiminalAdapter) {
             deployedAdapter = _deployLiminal(hyperCrocVault);
         }
@@ -260,14 +260,15 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         return address(uniswapAdapter);
     }
 
-    function _deployHyperbeat() internal returns (address) {
+    function _deployHyperbeat(address hyperCrocVault) internal returns (address) {
         address usdt = getAddress("USDT");
         address hbUSDT = getAddress("hbUSDT");
         address depositor = getAddress("HyperbeatUSDTDepositor");
         address withdrawalQueue = getAddress("HyperbeatUSDTWithdrawalQueue");
 
         vm.broadcast();
-        HyperbeatAdapter hyperbeatAdapter = new HyperbeatAdapter(usdt, hbUSDT, depositor, withdrawalQueue);
+        HyperbeatAdapter hyperbeatAdapter = 
+            new HyperbeatAdapter(hyperCrocVault, usdt, hbUSDT, depositor, withdrawalQueue);
         return address(hyperbeatAdapter);
     }
 

@@ -24,4 +24,14 @@ interface IWithdrawalQueue {
     )
         external
         returns (WithdrawalRequest memory);
+
+    function cancelWithdrawalRequestAndClaimShares(WithdrawalRequest memory _withdrawalRequest) external;
+
+    function getActiveWithdrawals() external view returns (bytes32[] memory);
+
+    function pricer() external view returns (address);
+
+    function processWithdrawalRequests(WithdrawalRequest[] memory _withdrawalRequestsToProcess) external;
+
+    function rejectWithdrawalRequest(WithdrawalRequest memory _withdrawalRequest) external;
 }
