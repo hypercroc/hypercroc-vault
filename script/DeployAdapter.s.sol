@@ -55,8 +55,8 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         // deployAdapter(Adapter.PendleAdapter, address(0));
         // deployAdapter(Adapter.UniswapAdapter, address(0));
         // deployAdapter(Adapter.ResolvAdapter, address(0));
-        // deployAdapter(Adapter.HyperbeatAdapter, address(0));
-        deployAdapter(Adapter.LiminalAdapter, 0x476a9C7f75434A86A7eD4fbC69EeF2574c4Fd8c9);
+        deployAdapter(Adapter.HyperbeatAdapter, address(0x476a9C7f75434A86A7eD4fbC69EeF2574c4Fd8c9));
+        // deployAdapter(Adapter.LiminalAdapter, address(0));
     }
 
     function getDeployedAdapter(Adapter adapter, address vault) public view returns (address) {
@@ -120,7 +120,7 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         } else if (adapter == Adapter.UniswapAdapter) {
             deployedAdapter = _deployUniswap();
         } else if (adapter == Adapter.HyperbeatAdapter) {
-            deployedAdapter = _deployHyperbeat();
+            deployedAdapter = _deployHyperbeat(hyperCrocVault);
         } else if (adapter == Adapter.LiminalAdapter) {
             deployedAdapter = _deployLiminal(hyperCrocVault);
         }
@@ -260,14 +260,15 @@ contract DeployAdapter is DeployHelper, AdapterUtils {
         return address(uniswapAdapter);
     }
 
-    function _deployHyperbeat() internal returns (address) {
+    function _deployHyperbeat(address hyperCrocVault) internal returns (address) {
         address usdt = getAddress("USDT");
         address hbUSDT = getAddress("hbUSDT");
         address depositor = getAddress("HyperbeatUSDTDepositor");
         address withdrawalQueue = getAddress("HyperbeatUSDTWithdrawalQueue");
 
         vm.broadcast();
-        HyperbeatAdapter hyperbeatAdapter = new HyperbeatAdapter(usdt, hbUSDT, depositor, withdrawalQueue);
+        HyperbeatAdapter hyperbeatAdapter = 
+            new HyperbeatAdapter(hyperCrocVault, usdt, hbUSDT, depositor, withdrawalQueue);
         return address(hyperbeatAdapter);
     }
 

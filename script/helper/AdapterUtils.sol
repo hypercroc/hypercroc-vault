@@ -26,7 +26,8 @@ abstract contract AdapterUtils {
         return adapter == Adapter.EthenaAdapter 
             || adapter == Adapter.HyperCrocPoolAdapter
             || adapter == Adapter.EtherfiBTC
-            || adapter == Adapter.LiminalAdapter;
+            || adapter == Adapter.LiminalAdapter
+            || adapter == Adapter.HyperbeatAdapter;
     }
 
     function _getAdapterName(Adapter adapter) internal pure returns (string memory) {
