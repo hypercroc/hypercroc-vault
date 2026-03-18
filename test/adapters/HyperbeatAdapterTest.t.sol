@@ -62,11 +62,7 @@ contract HyperbeatAdapterTest is Test {
         hyperCrocVault.setMaxTrackedAssets(type(uint8).max);
 
         adapter = new HyperbeatAdapter(
-            address(hyperCrocVault),
-            address(USDT),
-            address(HB_USDT),
-            Depositor,
-            HBWithdrawalQueue
+            address(hyperCrocVault), address(USDT), address(HB_USDT), Depositor, HBWithdrawalQueue
         );
         hyperCrocVault.addAdapter(address(adapter));
         assertEq(hyperCrocVault.externalPositionAdapterPosition(address(adapter)), 1);
@@ -91,11 +87,7 @@ contract HyperbeatAdapterTest is Test {
         new HyperbeatAdapter(address(hyperCrocVault), address(USDT), address(HB_USDT), Depositor, address(0));
 
         HyperbeatAdapter _adapter = new HyperbeatAdapter(
-            address(hyperCrocVault),
-            address(USDT),
-            address(HB_USDT),
-            Depositor,
-            HBWithdrawalQueue
+            address(hyperCrocVault), address(USDT), address(HB_USDT), Depositor, HBWithdrawalQueue
         );
 
         assertEq(address(_adapter.getHyperCrocVault()), address(hyperCrocVault));
@@ -179,7 +171,7 @@ contract HyperbeatAdapterTest is Test {
         _assertNoManagedAssets();
         _assertNoDebtAssets();
     }
-    
+
     function test_requestWithdraw() public {
         uint256 amount = 5_000 * 10 ** 6;
         deal(address(HB_USDT), address(hyperCrocVault), amount);
@@ -230,7 +222,7 @@ contract HyperbeatAdapterTest is Test {
         assertEq(HB_USDT.balanceOf(address(adapter)), 0);
         assertEq(USDT.balanceOf(address(adapter)), 0);
 
-         (address token, uint256 claimableAmount) = adapter.claimable(address(hyperCrocVault));
+        (address token, uint256 claimableAmount) = adapter.claimable(address(hyperCrocVault));
         assertEq(token, address(0));
         assertEq(claimableAmount, 0);
 
@@ -455,8 +447,7 @@ contract HyperbeatAdapterTest is Test {
     }
 
     function _processWithdrawal(IWithdrawalQueue.WithdrawalRequest memory request) private {
-        IWithdrawalQueue.WithdrawalRequest[] memory requests = 
-            new IWithdrawalQueue.WithdrawalRequest[](1);
+        IWithdrawalQueue.WithdrawalRequest[] memory requests = new IWithdrawalQueue.WithdrawalRequest[](1);
         requests[0] = request;
 
         vm.prank(HBAdmin);

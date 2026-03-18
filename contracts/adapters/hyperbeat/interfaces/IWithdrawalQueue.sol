@@ -16,12 +16,7 @@ interface IWithdrawalQueue {
 
     function instantWithdraw(address _user, uint256 _amount) external;
 
-    function createWithdrawalRequest(
-        address _user,
-        uint256 _amount,
-        uint256 _minAssetOut,
-        uint64 _deadline
-    )
+    function createWithdrawalRequest(address _user, uint256 _amount, uint256 _minAssetOut, uint64 _deadline)
         external
         returns (WithdrawalRequest memory);
 

@@ -23,7 +23,9 @@ contract HyperbeatAdapter is AdapterBase, IExternalPositionAdapter {
 
     bytes4 public constant getAdapterId = bytes4(keccak256("HyperbeatAdapter"));
 
-    event Hyperbeat__WithdrawalRequested(address indexed vault, uint256 hbUsdtAmount, uint256 minUsdtOut, uint64 deadline);
+    event Hyperbeat__WithdrawalRequested(
+        address indexed vault, uint256 hbUsdtAmount, uint256 minUsdtOut, uint64 deadline
+    );
     event HyperbeatAdapter__ProcessedWithdrawalClaimed(address indexed vault, uint256 usdtAmount);
     event HyperbeatAdapter__RejectedWithdrawalClaimed(address indexed vault, uint256 hbUsdtAmount);
     event HyperbeatAdapter__WithdrawalCancelled(address indexed vault, uint256 hbUsdtAmount);
@@ -72,11 +74,7 @@ contract HyperbeatAdapter is AdapterBase, IExternalPositionAdapter {
     /// @notice Deposit all USDT except the given amount
     /// @param except Amount to be left
     /// @return hbUSDTAmount Amount of hbUSDT received
-    function depositAllExcept(uint256 except, bytes32 refCode)
-        external
-        onlyVault
-        returns (uint256 hbUSDTAmount)
-    {
+    function depositAllExcept(uint256 except, bytes32 refCode) external onlyVault returns (uint256 hbUSDTAmount) {
         IERC20 usdt = i_usdt;
         uint256 amount = usdt.balanceOf(msg.sender) - except;
         hbUSDTAmount = _deposit(usdt, amount, refCode);
@@ -110,7 +108,7 @@ contract HyperbeatAdapter is AdapterBase, IExternalPositionAdapter {
         _requestWithdrawal(i_hbUSDT, amount, deadline);
     }
 
-     function claimProcessedWithdrawal() external onlyVault {
+    function claimProcessedWithdrawal() external onlyVault {
         IWithdrawalQueue.WithdrawalRequest memory request = _dequeueWithdrawalRequest();
 
         hbUSDTRequested -= request.amount;
@@ -173,7 +171,7 @@ contract HyperbeatAdapter is AdapterBase, IExternalPositionAdapter {
     /// @param vault Address of the vault
     function getManagedAssets(address vault) public view returns (address[] memory assets, uint256[] memory amounts) {
         if (vault != i_hyperCrocVault) return (assets, amounts);
-        
+
         uint256 _hbUSDTRequested = hbUSDTRequested;
         if (_hbUSDTRequested != 0) {
             assets = new address[](1);
@@ -216,7 +214,6 @@ contract HyperbeatAdapter is AdapterBase, IExternalPositionAdapter {
         if (!_isActive(keccak256(abi.encode(request)))) {
             return (address(i_usdt), request.baseAssetAmount);
         }
-
     }
 
     function getRequest(uint256 index) external view returns (IWithdrawalQueue.WithdrawalRequest memory) {
@@ -231,10 +228,7 @@ contract HyperbeatAdapter is AdapterBase, IExternalPositionAdapter {
         return s_queue.end;
     }
 
-    function _deposit(IERC20 usdt, uint256 amount, bytes32 refCode)
-        private
-        returns (uint256 hbUSDTAmount)
-    {
+    function _deposit(IERC20 usdt, uint256 amount, bytes32 refCode) private returns (uint256 hbUSDTAmount) {
         IAdapterCallback(msg.sender).adapterCallback(address(this), address(usdt), amount);
 
         IDepositor depositor = i_depositor;
@@ -248,31 +242,31 @@ contract HyperbeatAdapter is AdapterBase, IExternalPositionAdapter {
 
     function _instantWithdraw(IERC20 hbUSDT, uint256 hbUSDTAmount) private returns (uint256 withdrawn) {
         IAdapterCallback(msg.sender).adapterCallback(address(this), address(hbUSDT), hbUSDTAmount);
-        
+
         IWithdrawalQueue withdrawalQueue = i_withdrawalQueue;
         hbUSDT.forceApprove(address(withdrawalQueue), hbUSDTAmount);
 
         withdrawalQueue.instantWithdraw(address(this), hbUSDTAmount);
         withdrawn = _transferAll(i_usdt);
-    
+
         emit Swap(msg.sender, address(hbUSDT), hbUSDTAmount, address(i_usdt), withdrawn);
     }
 
     function _requestWithdrawal(IERC20 hbUSDT, uint256 hbUSDTAmount, uint64 deadline) private {
         IAdapterCallback(msg.sender).adapterCallback(address(this), address(hbUSDT), hbUSDTAmount);
-        
+
         IWithdrawalQueue withdrawalQueue = i_withdrawalQueue;
         hbUSDT.forceApprove(address(withdrawalQueue), hbUSDTAmount);
 
         IPricer pricer = IPricer(withdrawalQueue.pricer());
         uint256 minAmountOut = pricer.getAssetAmount(address(i_usdt), hbUSDTAmount);
 
-        IWithdrawalQueue.WithdrawalRequest memory request = 
+        IWithdrawalQueue.WithdrawalRequest memory request =
             withdrawalQueue.createWithdrawalRequest(address(this), hbUSDTAmount, minAmountOut, deadline);
 
         _enqueueWithdrawalRequest(request);
         hbUSDTRequested += hbUSDTAmount;
-    
+
         emit Hyperbeat__WithdrawalRequested(msg.sender, hbUSDTAmount, minAmountOut, deadline);
     }
 
